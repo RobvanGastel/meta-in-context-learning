@@ -1,0 +1,6 @@
+jax
+flax
+optax
+pillow
+jupyterlab
+matplotlib
