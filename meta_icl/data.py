@@ -48,7 +48,7 @@ def create_reg_dataset(
 def sample_regression_dataset(
     rng,
     input_size: int,
-    set_size: int = 100,
+    set_size: int = 10,
     distract_size: int = 0,  # Not used?
     input_range: float = 1.0,
     w_scale: float = 1.0,
@@ -60,7 +60,7 @@ def sample_regression_dataset(
     )
 
     train_data = data_creator(
-        jax.random.split(rng, num=5),
+        jax.random.split(rng, num=2048),
         input_size,
         set_size,
         distract_size,
