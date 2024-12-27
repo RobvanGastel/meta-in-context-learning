@@ -38,8 +38,8 @@ class MultiHeadAttention(nn.Module):
     ):
         """Computes MHA with optional mask."""
 
-        query_heads = self._linear_projection(query, self.key_size, "query")
         key_heads = self._linear_projection(key, self.key_size, "key")
+        query_heads = self._linear_projection(query, self.key_size, "query")
         value_heads = self._linear_projection(value, self.key_size, "value")
 
         if self.sum_normalization:

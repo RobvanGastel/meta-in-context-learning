@@ -57,10 +57,9 @@ class Transformer(nn.Module):
     num_layers: int = 1
     key_size: int = 11
     output_size: int = 1
-    embedding_size: int = 11
     widening_factor: int = 4
-    in_context_length: int = 10
-    in_context_length_test: int = 10
+    ic_length: int = 10
+    ic_length_test: int = 10
     only_attention: bool = True
     use_layer_norm: bool = True
     use_pe: bool = False
@@ -72,16 +71,18 @@ class Transformer(nn.Module):
     first_layer_sm: bool = False
     sum_norm: bool = False
     dampening: float = 1.0
-    clip: float = 0.0
+    clip: float = 1.0
     flip: bool = False
 
     def setup(self):
         if self.pe_size > 0:
             self.p_enc = self.create_pos_encoding(
-                self.in_context_length, self.pe_size, self.flip
+                self.ic_length,
+                self.pe_size,
             )
             self.p_enc_test = self.create_pos_encoding(
-                self.in_context_length_test, self.pe_size, self.flip
+                self.ic_length_test,
+                self.pe_size,
             )
         else:
             self.p_enc = None
@@ -91,7 +92,7 @@ class Transformer(nn.Module):
             self.attn_block = MultiHeadAttention(
                 num_heads=self.num_heads,
                 key_size=self.key_size,
-                model_size=self.key_size * self.num_heads,
+                model_size=self.key_size,
                 use_softmax=self.use_softmax,
                 use_non_lin_mix=self.use_non_lin_mix,
                 use_bias=self.use_bias,
@@ -118,11 +119,7 @@ class Transformer(nn.Module):
 
             h_attn, att_map = self.attn_block(h_norm, key, value)
         else:
-            # For non recurrent do not use a layer norm on the first layer.
             raise NotImplementedError
-
-        # TODO: Ignore dropout?
-        # h_attn = nn.Dropout(self.dropout_rate)(h_attn)
 
         h = h + self.dampening * h_attn
         if self.clip > 0:
@@ -135,9 +132,6 @@ class Transformer(nn.Module):
             else:
                 raise NotImplementedError
 
-            # TODO: Ignore dropout?
-            # h_dense = nn.Dropout(self.dropout_rate)(h_dense)
-
             h = h + self.dampening * h_dense
             if self.clip > 0:
                 h = jnp.clip(h, -self.clip, self.clip)
@@ -148,18 +142,14 @@ class Transformer(nn.Module):
         # Positional encoding
         if self.use_pe:
             pos_enc = self.p_enc if is_training else self.p_enc_test
-            x += pos_enc
+            x += pos_enc[None, :, :]
 
-        h = x
         for _ in range(self.num_layers):
-            h, _ = self.trans_block(h)
-
-        return h
+            x, _ = self.trans_block(x)
+        return x
 
     @staticmethod
-    def create_pos_encoding(
-        context_size: int, input_size: int, flip: bool = False
-    ) -> jnp.ndarray:
+    def create_pos_encoding(context_size: int, input_size: int) -> jnp.ndarray:
         """Create constant positional encoding."""
         pe = np.zeros((context_size, input_size))
         position = np.arange(0, context_size, dtype=np.float32)[:, None]
@@ -169,7 +159,5 @@ class Transformer(nn.Module):
         pe[:, 0::2] = np.sin(position * div_term)
         pe[:, 1::2] = np.cos(position * div_term)
         pe = pe[None]
-        if flip:
-            return jnp.flip(jax.numpy.squeeze(jax.device_put(pe), axis=0), 0)
-        else:
-            return jax.numpy.squeeze(jax.device_put(pe), axis=0)
+
+        return jax.numpy.squeeze(jax.device_put(pe), axis=0)
