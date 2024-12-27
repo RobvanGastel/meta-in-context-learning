@@ -60,7 +60,7 @@ def sample_regression_dataset(
     )
 
     train_data = data_creator(
-        jax.random.split(rng, num=2048),
+        jax.random.split(rng, num=10_000),
         input_size,
         set_size,
         distract_size,

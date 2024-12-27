@@ -11,7 +11,7 @@ class MultiHeadAttention(nn.Module):
     key_size: int
     model_size: int
     w_init: Optional[nn.initializers.Initializer] = nn.initializers.xavier_uniform()
-    use_bias_p: bool = False
+    use_bias: bool = False
     use_softmax: bool = False
     use_non_lin_mix: bool = False
     sum_normalization: bool = False
@@ -22,7 +22,7 @@ class MultiHeadAttention(nn.Module):
         """Linear projection for attention heads."""
         y = nn.Dense(
             self.num_heads * head_size,
-            use_bias=self.use_bias_p,
+            use_bias=self.use_bias,
             kernel_init=self.w_init,
             name=name,
         )(x)
@@ -40,8 +40,6 @@ class MultiHeadAttention(nn.Module):
 
         query_heads = self._linear_projection(query, self.key_size, "query")
         key_heads = self._linear_projection(key, self.key_size, "key")
-
-        # TODO: Potential self.value_size instead of key_size
         value_heads = self._linear_projection(value, self.key_size, "value")
 
         if self.sum_normalization:
@@ -77,7 +75,7 @@ class MultiHeadAttention(nn.Module):
         attn = attn.reshape((*attn.shape[:-2], -1))  # Reshape to [T', H*V]
 
         final_projection = nn.Dense(
-            self.model_size, kernel_init=self.w_init, use_bias=self.use_bias_p
+            self.model_size, kernel_init=self.w_init, use_bias=self.use_bias
         )
         attn = final_projection(attn)
         return attn, attn_weights
