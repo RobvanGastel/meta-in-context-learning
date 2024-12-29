@@ -4,7 +4,8 @@ This repository explores the behaviour of _in-context learning_, the same mechan
 
 In `in-context learning mechanism.ipynb` I explore a reimplemented a simple version the transformer in von Oswald et al., 2022. To explore the similarities to gradient descent and explore the structures of the different projections (Goh et al., 2021).
 
-In `general-purpose in-context learning.ipynb` I continue the exploration of in-context learning to see how it can be used more explicitly for meta-learning (von Oswald et al., 2022).
+In `general-purpose in-context learner.ipynb` I continue the exploration of in-context learning to see how it can be used more explicitly for meta-learning 
+(Kirsch et al., 2022). _Still working on this notebook ..._
 
 ## Setup
 Install the packages using the `requirements.txt` file.

@@ -9,8 +9,6 @@ from meta_icl.mha import MultiHeadAttention
 
 
 class MLP(nn.Module):
-    """A multi-layer perceptron (MLP)"""
-
     output_dim: int = 0
     widening_factor: int = 4
     use_bias: bool = False
@@ -51,8 +49,6 @@ class MLP(nn.Module):
 
 
 class Transformer(nn.Module):
-    """A flexible Transformer implementation."""
-
     num_heads: int = 1
     num_layers: int = 1
     key_size: int = 11

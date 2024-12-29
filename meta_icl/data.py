@@ -15,6 +15,9 @@ def create_reg_dataset(
 ):
     """Create a linear regression data set:
     X*w where x ~ U(-1, 1), w ~ N(0,1)
+
+    Taken from the original paper (von Oswald et al., 2022) but restructured to make the
+    code runnable again.
     """
     rng_1, rng_2, rng_3, rng_4, rng_5 = jax.random.split(rng, 5)
     w = jax.random.normal(rng_1, shape=[input_size]) * w_scale

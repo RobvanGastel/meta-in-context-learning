@@ -20,7 +20,7 @@ class MultiHeadAttention(nn.Module):
     def _linear_projection(
         self, x: jnp.ndarray, head_size: int, name: str
     ) -> jnp.ndarray:
-        """Linear projections"""
+
         y = nn.Dense(
             self.num_heads * head_size,
             use_bias=self.use_bias,
@@ -37,7 +37,7 @@ class MultiHeadAttention(nn.Module):
         value: jnp.ndarray,
         mask: Optional[jnp.ndarray] = None,
     ):
-        """Computes MHA with optional mask"""
+        # Computes MHA with optional mask
 
         key_heads = self._linear_projection(key, self.key_size, "key")
         query_heads = self._linear_projection(query, self.key_size, "query")
