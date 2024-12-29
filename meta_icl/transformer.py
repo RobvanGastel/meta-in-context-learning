@@ -9,7 +9,7 @@ from meta_icl.mha import MultiHeadAttention
 
 
 class MLP(nn.Module):
-    """A multi-layer perceptron (MLP)."""
+    """A multi-layer perceptron (MLP)"""
 
     output_dim: int = 0
     widening_factor: int = 4
@@ -110,7 +110,7 @@ class Transformer(nn.Module):
                 self.lnorm_2 = nn.LayerNorm(feature_axes=-1, use_scale=True)
 
     def trans_block(self, h):
-        """Transformer block with attention and optionally MLP."""
+        """(Recurrent) Transformer block"""
 
         if self.deq:
             h_norm = self.lnorm_1(h) if self.use_layer_norm else h
@@ -121,7 +121,12 @@ class Transformer(nn.Module):
         else:
             raise NotImplementedError
 
-        h = h + self.dampening * h_attn
+        # If more than 1 layer,
+        if self.num_layers > 1:
+            h = h.at[:, :, -1].set(h[:, :, -1] + self.dampening * h_attn[:, :, -1])
+        else:
+            h = h + self.dampening * h_attn
+
         if self.clip > 0:
             h = jnp.clip(h, -self.clip, self.clip)
 
@@ -144,9 +149,15 @@ class Transformer(nn.Module):
             pos_enc = self.p_enc if is_training else self.p_enc_test
             x += pos_enc[None, :, :]
 
+        attn = []
+        hidden_states = []
         for _ in range(self.num_layers):
-            x, _ = self.trans_block(x)
-        return x
+            x, attn_map = self.trans_block(x)
+
+            # Store outputs for analysis
+            hidden_states.append(x[:, -1, -1])
+            attn.append(attn_map)
+        return x, attn, hidden_states
 
     @staticmethod
     def create_pos_encoding(context_size: int, input_size: int) -> jnp.ndarray:

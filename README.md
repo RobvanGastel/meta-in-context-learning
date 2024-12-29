@@ -2,7 +2,7 @@
 
 This repository explores the behaviour of _in-context learning_, the same mechanism which GPT models display by adjusting their predictions based on the additional data given _in context_. Some papers compare the behavior of in-context learning to gradient descent (von Oswald et al., 2022), where each transformer layer corresponds to a gradient descent step which is implicitly performed in the model. This behavior shows up when the transformer is trained in a meta-learning fashion, by optimizing on a distribution of regression datasets.
 
-In `in-context learning mechanism.ipynb` I explore a reimplemented a simple version the transformer in von Oswald et al., 2022. To explore the similarities to gradient descent.
+In `in-context learning mechanism.ipynb` I explore a reimplemented a simple version the transformer in von Oswald et al., 2022. To explore the similarities to gradient descent and explore the structures of the different projections (Goh et al., 2021).
 
 In `general-purpose in-context learning.ipynb` I continue the exploration of in-context learning to see how it can be used more explicitly for meta-learning (von Oswald et al., 2022).
 
@@ -23,3 +23,5 @@ Kirsch, L., Harrison, J., Sohl-Dickstein, J., & Metz, L. (2022). General-Purpose
 Han, S., Song, J., Gore, J., & Agrawal, P. (2024). Emergence of Abstractions: Concept Encoding and Decoding Mechanism for In-Context Learning in Transformers (arXiv:2412.12276). arXiv. https://doi.org/10.48550/arXiv.2412.12276
 
 von Oswald, J., Niklasson, E., Randazzo, E., Sacramento, J., Mordvintsev, A., Zhmoginov, A., & Vladymyrov, M. (2022, December 15). Transformers learn in-context by gradient descent. arXiv.Org. https://arxiv.org/abs/2212.07677v2
+
+Goh, G., Cammarata, N., Voss, C., Carter, S., Petrov, M., Schubert, L., Radford, A., & Olah, C. (2021). Multimodal Neurons in Artificial Neural Networks. Distill, 6(3), 10.23915/distill.00030. https://doi.org/10.23915/distill.00030

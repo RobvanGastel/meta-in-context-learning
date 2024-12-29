@@ -1,11 +1,12 @@
+from typing import Optional
+
 import jax
 import jax.numpy as jnp
 from flax import linen as nn
-from typing import Optional
 
 
 class MultiHeadAttention(nn.Module):
-    """Multi-headed attention (MHA) module."""
+    """Multi-headed attention (MHA) module"""
 
     num_heads: int
     key_size: int
@@ -19,7 +20,7 @@ class MultiHeadAttention(nn.Module):
     def _linear_projection(
         self, x: jnp.ndarray, head_size: int, name: str
     ) -> jnp.ndarray:
-        """Linear projection for attention heads."""
+        """Linear projections"""
         y = nn.Dense(
             self.num_heads * head_size,
             use_bias=self.use_bias,
@@ -36,7 +37,7 @@ class MultiHeadAttention(nn.Module):
         value: jnp.ndarray,
         mask: Optional[jnp.ndarray] = None,
     ):
-        """Computes MHA with optional mask."""
+        """Computes MHA with optional mask"""
 
         key_heads = self._linear_projection(key, self.key_size, "key")
         query_heads = self._linear_projection(query, self.key_size, "query")
@@ -75,7 +76,10 @@ class MultiHeadAttention(nn.Module):
         attn = attn.reshape((*attn.shape[:-2], -1))  # Reshape to [T', H*V]
 
         final_projection = nn.Dense(
-            self.model_size, kernel_init=self.w_init, use_bias=self.use_bias
+            self.model_size,
+            kernel_init=self.w_init,
+            use_bias=self.use_bias,
+            name="final_proj",
         )
         attn = final_projection(attn)
         return attn, attn_weights

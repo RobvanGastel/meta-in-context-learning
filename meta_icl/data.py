@@ -1,17 +1,20 @@
+from functools import partial
+
 import jax
 import jax.numpy as jnp
 
 
+@partial(jax.jit, static_argnums=(1, 2, 3))
 def create_reg_dataset(
     rng,
-    input_size,
-    set_size,
-    distract_size,
-    input_range,
-    w_scale,
+    input_size: int,
+    set_size: int,
+    distract_size: int,
+    input_range: float,
+    w_scale: float,
 ):
     """Create a linear regression data set:
-    X*w where x ~ U(-1, 1), w ~ N(0,1).
+    X*w where x ~ U(-1, 1), w ~ N(0,1)
     """
     rng_1, rng_2, rng_3, rng_4, rng_5 = jax.random.split(rng, 5)
     w = jax.random.normal(rng_1, shape=[input_size]) * w_scale
@@ -48,8 +51,8 @@ def create_reg_dataset(
 def sample_regression_dataset(
     rng,
     input_size: int,
+    batch_size: int = 10_000,
     set_size: int = 10,
-    distract_size: int = 0,  # Not used?
     input_range: float = 1.0,
     w_scale: float = 1.0,
 ):
@@ -60,12 +63,11 @@ def sample_regression_dataset(
     )
 
     train_data = data_creator(
-        jax.random.split(rng, num=15_000),
+        jax.random.split(rng, num=batch_size),
         input_size,
         set_size,
-        distract_size,
+        0,
         input_range,
         w_scale,
     )
-
     return train_data
