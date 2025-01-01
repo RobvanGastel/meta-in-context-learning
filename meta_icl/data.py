@@ -1,7 +1,58 @@
 from functools import partial
 
 import jax
+import numpy as np
 import jax.numpy as jnp
+from torch.utils.data import Dataset
+
+
+class FewShotDataset(Dataset):
+    def __init__(self, dataset, train: bool, transform=None):
+        self.dataset = dataset(root="./data", train=train, download=True)
+
+        self.X = self.dataset.data
+        self.y = self.dataset.targets  # convert to long
+        self.transform = transform
+
+    def __getitem__(self, idx):
+        x, y = self.X[idx], self.y[idx]
+        if self.transform:
+            x = self.transform(x)
+        return x, y
+
+    def __len__(self):
+        return len(self.X)
+
+
+class FewShotBatchSampler:
+    def __init__(self, y, n_way, k_shot, shuffle=True):
+        self.y = y.numpy()
+        self.n_way = n_way
+        self.k_shot = k_shot
+        self.shuffle = shuffle
+
+        self.class_indices = {
+            c: np.where(self.y == c)[0].tolist() for c in np.unique(y)
+        }
+
+    def __iter__(self):
+        classes = np.array(list(self.class_indices.keys()))
+
+        if self.shuffle:
+            np.random.shuffle(classes)
+
+        for _ in range(len(classes) // self.n_way):
+            selected_classes = np.random.choice(classes, self.n_way, replace=False)
+            batch = []
+            for cls in selected_classes:
+                examples = np.random.choice(
+                    self.class_indices[cls], self.k_shot, replace=False
+                ).tolist()
+                batch.extend(examples)
+                yield batch
+
+    def __len__(self):
+        return len(self.y) // (self.n_way * self.k_shot)
 
 
 @partial(jax.jit, static_argnums=(1, 2, 3))

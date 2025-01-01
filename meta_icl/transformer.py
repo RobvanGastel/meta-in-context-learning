@@ -8,7 +8,7 @@ from flax import linen as nn
 from meta_icl.mha import MultiHeadAttention
 
 
-class MLP(nn.Module):
+class FeedForward(nn.Module):
     output_dim: int = 0
     widening_factor: int = 4
     use_bias: bool = False
@@ -96,7 +96,7 @@ class Transformer(nn.Module):
             )
 
             if not self.only_attention:
-                self.dense_block = MLP(
+                self.dense_block = FeedForward(
                     widening_factor=self.widening_factor,
                     use_bias=self.use_bias,
                 )
@@ -157,7 +157,7 @@ class Transformer(nn.Module):
 
     @staticmethod
     def create_pos_encoding(context_size: int, input_size: int) -> jnp.ndarray:
-        """Create constant positional encoding."""
+        # sin-cos positional embedding
         pe = np.zeros((context_size, input_size))
         position = np.arange(0, context_size, dtype=np.float32)[:, None]
         div_term = np.exp(
