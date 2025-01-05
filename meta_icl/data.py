@@ -18,6 +18,9 @@ class FewShotDataset(Dataset):
         x, y = self.X[idx], self.y[idx]
         if self.transform:
             x = self.transform(x)
+
+        # Normalize the data
+        x = x.float() / 255
         return x, y
 
     def __len__(self):
@@ -38,9 +41,6 @@ class FewShotBatchSampler:
     def __iter__(self):
         classes = np.array(list(self.class_indices.keys()))
 
-        if self.shuffle:
-            np.random.shuffle(classes)
-
         for _ in range(len(classes) // self.n_way):
             selected_classes = np.random.choice(classes, self.n_way, replace=False)
             batch = []
@@ -49,7 +49,10 @@ class FewShotBatchSampler:
                     self.class_indices[cls], self.k_shot, replace=False
                 ).tolist()
                 batch.extend(examples)
-                yield batch
+
+            if self.shuffle:
+                np.random.shuffle(batch)
+            yield batch
 
     def __len__(self):
         return len(self.y) // (self.n_way * self.k_shot)
