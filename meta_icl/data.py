@@ -14,13 +14,18 @@ class FewShotDataset(Dataset):
         self.y = self.dataset.targets  # convert to long
         self.transform = transform
 
+        self.mean = self.X.float().mean() / 255
+        self.std = self.X.float().std() / 255
+
     def __getitem__(self, idx):
         x, y = self.X[idx], self.y[idx]
         if self.transform:
             x = self.transform(x)
 
-        # Normalize the data
         x = x.float() / 255
+        # Z-normalize
+        x = (x - self.mean) / self.std
+
         return x, y
 
     def __len__(self):
@@ -28,11 +33,12 @@ class FewShotDataset(Dataset):
 
 
 class FewShotBatchSampler:
-    def __init__(self, y, n_way, k_shot, shuffle=True):
+    def __init__(self, y, n_way, k_shot, batch_size=5, shuffle=True):
         self.y = y.numpy()
         self.n_way = n_way
         self.k_shot = k_shot
         self.shuffle = shuffle
+        self.batch_size = batch_size
 
         self.class_indices = {
             c: np.where(self.y == c)[0].tolist() for c in np.unique(y)
@@ -42,17 +48,21 @@ class FewShotBatchSampler:
         classes = np.array(list(self.class_indices.keys()))
 
         for _ in range(len(classes) // self.n_way):
-            selected_classes = np.random.choice(classes, self.n_way, replace=False)
-            batch = []
-            for cls in selected_classes:
-                examples = np.random.choice(
-                    self.class_indices[cls], self.k_shot, replace=False
-                ).tolist()
-                batch.extend(examples)
+            tasks = []
+            for _ in range(self.num_tasks):
+                selected_classes = np.random.choice(classes, self.n_way, replace=False)
+                batch = []
+                for cls in selected_classes:
+                    examples = np.random.choice(
+                        self.class_indices[cls], self.k_shot, replace=False
+                    ).tolist()
+                    batch.extend(examples)
 
-            if self.shuffle:
-                np.random.shuffle(batch)
-            yield batch
+                if self.shuffle:
+                    np.random.shuffle(batch)
+                tasks.append(batch)
+
+            yield tasks
 
     def __len__(self):
         return len(self.y) // (self.n_way * self.k_shot)

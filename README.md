@@ -3,9 +3,17 @@
 This repository explores the behaviour of _in-context learning_, the same mechanism which GPT models display by adjusting their predictions based on the additional data given _in context_. Some papers compare the behavior of in-context learning to gradient descent (von Oswald et al., 2022a), where each transformer layer corresponds to a gradient descent step which is implicitly performed in the model. This behavior shows up when the transformer is trained in a meta-learning fashion, by optimizing on a distribution of regression datasets.
 
 In `in-context learning mechanism.ipynb` I explore a reimplemented a simple version the transformer in von Oswald et al., 2022a. To explore the similarities to gradient descent and explore the structures of the different projections (von Oswald et al., 2022b).
+<p>
+    <a href= "https://colab.research.google.com/github/RobvanGastel/meta-in-context-learning/blob/main/in-context learning mechanism.ipynb">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg"/></a>
+</p>
 
 In `general-purpose in-context learner.ipynb` I continue the exploration of in-context learning to see how it can be used more explicitly for meta-learning 
 (Kirsch et al., 2022). _Still working on this notebook ..._
+<p>
+    <a href= "https://colab.research.google.com/github/RobvanGastel/meta-in-context-learning/blob/main/general-purpose in-context learning.ipynb">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg"/></a>
+</p>
 
 ## Setup
 Install the packages using the `requirements.txt` file.

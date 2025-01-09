@@ -25,10 +25,18 @@ class ViT(nn.Module):
     patch_size: int
     emb_dim: int
     mlp_dim: int
+    seq_length: int
     channels: int = 3
     num_heads: int = 1
     num_layers: int = 1
     d_head: int = 64
+
+    def setup(self):
+        self.pos_embedding = self.param(
+            "pos_embedding",
+            initializers.zeros,
+            (1, self.seq_length, self.emb_dim),  # Initialize to zeros
+        )
 
     def forward_features(self, x):
         # ViT Encoder
@@ -52,9 +60,6 @@ class ViT(nn.Module):
             ]
         )
 
-        # TODO: Have pretrained weights
-        # With pretrained weights attempt freezing the encoder
-
         for attn, ff in layers:
             x = attn(x) + x
             x = ff(x) + x
@@ -64,36 +69,25 @@ class ViT(nn.Module):
 
     @nn.compact
     def __call__(self, X, y):
-        img_h, img_w = self.image_size, self.image_size
-        patch_h, patch_w = self.patch_size[0], self.patch_size[1]
-
-        assert (
-            img_h % patch_h == 0 and img_w % patch_w == 0
-        ), "Image dimensions must be divisible by the patch size."
-
-        # TODO: Get right input format, should reshape to batch, sequence, emb_dim (28*28)
+        # Input shape (B, S, H*W)
         b, *_ = X.shape
 
         # Prepare context vector
         y_one_hot = jax.nn.one_hot(y, num_classes=self.num_classes)
         y_emb = jnp.concatenate(
-            [jnp.zeros((1, 1, self.num_classes)), y_one_hot], axis=0
+            [jnp.zeros((b, 1, self.num_classes)), y_one_hot], axis=1
         )
-        y_emb = jnp.tile(y_emb[None, :, :], (b, 1, 1))
 
-        # new shape: batch, sequence, (10 + 28*28)
+        # new shape: batch, sequence, (num_classes + H*W)
         context = jnp.concatenate([X, y_emb], axis=-1)
 
         # Apply learned positional embeddings
-        input_proj = nn.Dense(self.emb_dim)(context)
-        pos_emb = self.param(
-            "pos_emb", initializers.zeros, (1, 28, self.emb_dim)  # Initialize to zeros
-        )
-
-        context = input_proj(context) + pos_emb[:, : context.shape[1], :]
+        context = nn.Dense(self.emb_dim, name="learned_embeddings")(context)
+        context = context + self.pos_embedding[:, : context.shape[1], :]
 
         sequence = self.forward_features(context)
         query = sequence[:, -1]
 
-        output_proj = nn.Dense(self.num_classes, use_bias=False)
-        return output_proj(query)
+        output_proj = nn.Dense(self.num_classes, use_bias=False, name="out_proj")
+        out = output_proj(query)
+        return out
