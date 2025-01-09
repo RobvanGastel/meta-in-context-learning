@@ -11,7 +11,7 @@ In `in-context learning mechanism.ipynb` I explore a reimplemented a simple vers
 In `general-purpose in-context learner.ipynb` I continue the exploration of in-context learning to see how it can be used more explicitly for meta-learning 
 (Kirsch et al., 2022). _Still working on this notebook ..._
 <p>
-    <a href= "https://colab.research.google.com/github/RobvanGastel/meta-in-context-learning/blob/main/general-purpose in-context learning.ipynb">
+    <a href= "https://colab.research.google.com/github/RobvanGastel/meta-in-context-learning/blob/main/general-purpose in-context learner.ipynb">
     <img src="https://colab.research.google.com/assets/colab-badge.svg"/></a>
 </p>
 
