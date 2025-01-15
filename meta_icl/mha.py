@@ -98,6 +98,7 @@ class SimplifiedMultiHeadAttention(nn.Module):
     def __call__(self, x):
         inner_dim = self.d_head * self.num_heads
         norm = nn.LayerNorm(epsilon=1e-5, use_bias=False)
+
         to_qkv = nn.Dense(inner_dim * 3, use_bias=False)
         to_out = nn.Dense(self.emb_dim, use_bias=False)
 
@@ -105,13 +106,13 @@ class SimplifiedMultiHeadAttention(nn.Module):
 
         qkv = jnp.split(to_qkv(x), 3, axis=-1)
         q, k, v = map(
-            lambda t: rearrange(t, "bn(hd)->bhnd", h=self.num_heads),
+            lambda t: rearrange(t, "b n (h d) -> b h n d", h=self.num_heads),
             qkv,
         )
 
-        dots = jnp.einsum("bhid,bhjd->bhij", q, k) * self.d_head**-0.5
+        dots = jnp.einsum("b h i d, b h j d -> b h i j", q, k) * self.d_head**-0.5
         attn = nn.softmax(dots, axis=-1)
 
-        x = jnp.einsum("bhij,bhjd->bhid", attn, v)
-        out = rearrange(x, "bhnd->bn(hd)")
+        x = jnp.einsum("b h i j, b h j d -> b h i d", attn, v)
+        out = rearrange(x, "b h n d -> b n (h d)")
         return to_out(out)
