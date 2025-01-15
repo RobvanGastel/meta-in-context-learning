@@ -49,7 +49,7 @@ class FewShotBatchSampler:
 
         for _ in range(len(classes) // self.n_way):
             tasks = []
-            for _ in range(self.num_tasks):
+            for _ in range(self.batch_size):
                 selected_classes = np.random.choice(classes, self.n_way, replace=False)
                 batch = []
                 for cls in selected_classes:
