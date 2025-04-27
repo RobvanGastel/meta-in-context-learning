@@ -15,7 +15,7 @@ In `general-purpose in-context learner.ipynb` I continue the exploration of in-c
     <img src="https://colab.research.google.com/assets/colab-badge.svg"/></a>
 </p>
 
-In recent work (Minegishi et al. 2025), they extend the analysis of small scale transformer models for meta in-context learning, and hypothesize that the induction head alone can not explain all of the (meta) in-context learning that happens within LLMs.
+In recent work (Minegishi et al. 2025), they extend the analysis of small-scale transformer models for meta in-context learning and hypothesize that the induction head alone can not explain all of the (meta) in-context learning that happens within LLMs. There are also works exploring in-context learning on larger transformers, most prominent example is the Titans architecture (Behrouz, Zhong, and Mirrokni 2024). 
 
 ## Setup
 Install the packages using the `requirements.txt` file.
@@ -40,3 +40,4 @@ Olsson, et al., "In-context Learning and Induction Heads", Transformer Circuits 
 
 Minegishi, Gouki, Hiroki Furuta, Shohei Taniguchi, Yusuke Iwasawa, and Yutaka Matsuo. 2025. “In-Context Meta Learning Induces Multi-Phase Circuit Emergence.” https://openreview.net/forum?id=LNMfzv8TNb&referrer=%5Bthe%20profile%20of%20Yutaka%20Matsuo%5D(%2Fprofile%3Fid%3D~Yutaka_Matsuo1) (April 17, 2025).
 
+Behrouz, Ali, Peilin Zhong, and Vahab Mirrokni. 2024. “Titans: Learning to Memorize at Test Time.” doi:10.48550/arXiv.2501.00663.
