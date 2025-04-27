@@ -5,3 +5,5 @@ pillow
 einops
 jupyterlab
 matplotlib
+torchvision
+transformers

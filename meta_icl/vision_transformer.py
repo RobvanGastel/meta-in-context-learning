@@ -36,6 +36,7 @@ class ViT(nn.Module):
 
     def setup(self):
         self.clip_model = FlaxCLIPModel.from_pretrained(self.image_encoder)
+        self._get_image_feats = jax.jit(self.clip_model.get_image_features)
         self.preprocessor = CLIPProcessor.from_pretrained(self.image_encoder)
 
         self.pos_embedding = self.param(
@@ -45,11 +46,8 @@ class ViT(nn.Module):
         )
 
     def forward_features(self, x):
-        inputs = self.preprocessor(
-            images=x, return_tensors="np"
-        )  # TODO: Check return tensors
-        pixel_values = jnp.array(inputs["pixel_values"])
-        image_features = self.clip_model.get_image_features(pixel_values)
+        inputs = self.preprocessor(images=x, return_tensors="jax", use_fast=True)
+        image_features = self._get_image_feats(**inputs)
         return image_features
 
     def forward_encoder(self, x):
@@ -93,7 +91,7 @@ class ViT(nn.Module):
         X_emb = X_emb.reshape(b, s, 512)
 
         # new shape: batch, sequence, (num_classes + H*W)
-        context = jnp.concatenate([X, y_emb], axis=-1)
+        context = jnp.concatenate([X_emb, y_emb], axis=-1)
 
         # Apply learned positional embeddings
         context = nn.Dense(self.emb_dim)(context)
