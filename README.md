@@ -1,6 +1,6 @@
 # Testing the Meta In-Context Learning Capabilities of Transformers
 
-This repository explores the behaviour of _in-context learning_, the same mechanism which GPT models display by adjusting their predictions based on the additional data given _in context_. Some papers compare the behavior of in-context learning to gradient descent (von Oswald et al., 2022a), where each transformer layer corresponds to a gradient descent step which is implicitly performed in the model. This behavior shows up when the transformer is trained in a meta-learning fashion, by optimizing on a distribution of regression datasets.
+This repository explores the behaviour of _in-context learning_, the same mechanism that GPT models display by adjusting their predictions based on the additional data given _in context_. Some papers compare the behavior of in-context learning to gradient descent (von Oswald et al., 2022a), where each transformer layer corresponds to a gradient descent step which is implicitly performed in the model. This behavior shows up when the transformer is trained in a meta-learning fashion, by optimizing on a distribution of regression datasets.
 
 In `in-context learning mechanism.ipynb` I explore a reimplemented a simple version the transformer in von Oswald et al., 2022a. To explore the similarities to gradient descent and explore the structures of the different projections (von Oswald et al., 2022b).
 <p>
