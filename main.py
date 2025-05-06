@@ -1,3 +1,4 @@
+import json
 import pickle
 import argparse
 
@@ -20,7 +21,7 @@ def train_step(state, X, y, perm_prob, train_key, eval_key):
         logits = state.apply_fn(params, X, y[:, :-1])
         # Compare against the last y label in the few-shot task and omit this y label during
         # the forward pass.
-        y_one_hot = jax.nn.one_hot(y, 10)[:, -1].squeeze()
+        y_one_hot = jax.nn.one_hot(y, 10)[:, -1]
         loss = jnp.mean(optax.softmax_cross_entropy(logits=logits, labels=y_one_hot))
         return loss
 
@@ -33,9 +34,8 @@ def train_step(state, X, y, perm_prob, train_key, eval_key):
 
     # Validating the performance with a different evaluation key
     X_bar, y_bar = augment_tasks(X, y, eval_key)
-    logits = state.apply_fn(state.params, X_bar, y[:, :-1])
-    y_one_hot = jax.nn.one_hot(y, 10)[:, -1].squeeze()
-    acc = jnp.sum(y[:, -1] == jnp.argmax(logits, axis=-1))
+    logits = state.apply_fn(state.params, X_bar, y_bar[:, :-1])
+    acc = jnp.sum(y_bar[:, -1] == jnp.argmax(logits, axis=-1))
     return state, loss, acc
 
 class TrainState(train_state.TrainState):
@@ -81,7 +81,7 @@ def train_general_purpose_vit(config: argparse.Namespace):
         "loss": [],
         "accuracy": []
     }
-    for epoch in range(config.epochs):
+    for epoch in range(config.epochs+1):
         train_loss = 0
         accuracy = 0.0
     
@@ -101,12 +101,12 @@ def train_general_purpose_vit(config: argparse.Namespace):
         metrics["loss"].append(float(train_loss))
         metrics["accuracy"].append(float(accuracy))
     
-        if epoch % 50 == 0:
+        if epoch % 20 == 0:
             print(f"epoch {epoch}/{config.epochs}: loss: {train_loss}, accuracy: {accuracy}")
     
             # Save the weights
             with open(f"output/gpicl_e{epoch}.pkl", "wb") as f:
-                f.write(pickle.dumps(serialization.to_state_dict(params)))
+                f.write(pickle.dumps(serialization.to_state_dict(state.params)))
     
     with open(f"output/gpicl_mnist_metrics.json", "w") as f:
         json.dump(metrics, f)
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--epochs",
         type=int,
-        default=750,
+        default=800,
         help="Number of training epochs",
     )
     parser.add_argument(
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lr",
         type=float,
-        default=1e-4,
+        default=1e-3,
         help="Learning rate",
     )
     parser.add_argument(
