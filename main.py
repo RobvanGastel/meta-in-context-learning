@@ -101,7 +101,7 @@ def train_general_purpose_vit(config: argparse.Namespace):
         metrics["loss"].append(float(train_loss))
         metrics["accuracy"].append(float(accuracy))
     
-        if epoch % 20 == 0:
+        if epoch % 50 == 0:
             print(f"epoch {epoch}/{config.epochs}: loss: {train_loss}, accuracy: {accuracy}")
     
             # Save the weights
@@ -140,12 +140,6 @@ if __name__ == "__main__":
         help="(N-way) k-shot few-shot task",
     )
     parser.add_argument(
-        "--sequence_length",
-        type=int,
-        default=6,
-        help="sequence",
-    )
-    parser.add_argument(
         "--epochs",
         type=int,
         default=800,
@@ -166,7 +160,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--batch_size",
         type=int,
-        default=512,
+        default=648,
         help="Finetuning batch size",
     )
     config = parser.parse_args()
